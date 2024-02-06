@@ -1,6 +1,6 @@
 import { ActionFunctionArgs, MetaFunction, redirect } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
-import {GetRenderSceneNames, RenderSceneNames} from "~/data/render"
+import {GetRenderSceneNames, RenderSceneNames} from "~/services/renderService"
 import SceneSelectionCard from "~/components/SceneSelectionCard";
 import { commitSession, getSession } from "~/session";
 

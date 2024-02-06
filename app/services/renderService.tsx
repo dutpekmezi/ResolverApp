@@ -1,5 +1,5 @@
 import constants from "constants.json"
-import BaseResponse from "./BaseResponse"
+import BaseResponse from "../Contracts/Responses/BaseResponse"
 
 export interface RenderSceneNames extends BaseResponse {
     data: string[];
