@@ -1,13 +1,11 @@
 import { ActionFunctionArgs,
 	LoaderFunctionArgs,
 	json,
-	unstable_parseMultipartFormData,
 	unstable_composeUploadHandlers,
 	unstable_createMemoryUploadHandler,
 	writeAsyncIterableToWritable
 	} from "@remix-run/node";
 import { Form, useActionData, useLoaderData } from "@remix-run/react";
-import { getStorage } from "firebase-admin/storage";
 import { getSession } from "~/session";
 import { bucket } from "~/utils/firebase";
 
@@ -25,41 +23,49 @@ export async function loader({
     return json(data);
 }
 
-async function UploadFileToFirebase(filename:string, data: AsyncIterable<Uint8Array>) 
+async function UploadFileToFirebase(filename:string, data: AsyncIterable<Uint8Array>) : Promise<string>
 {	
 	const file = bucket.file(filename);
 
-	return await writeAsyncIterableToWritable(
+	await writeAsyncIterableToWritable(
 		data,
 		file.createWriteStream()
-	);	
+	);
+	
+	return file.publicUrl();
 }
+
+interface UploadResult
+{
+	fileName:string
+};
 
 
 export async function action ({ request }: ActionFunctionArgs) 
 {
 	const formData = await request.formData();
+	const filename = formData.get("upload") as string;
 
 	const uploadHandler = unstable_composeUploadHandlers(
 		// our custom upload handler
-		async ({ name, contentType, data, filename }) => {
+		async ({ name, data }) => {
 		  if (name !== "file") {
 			return undefined;
 		  }
-		  const uploadedImage = await UploadFileToFirebase(request data);
-		  return uploadedImage.secure_url;
+		  let publicUrl:string = await UploadFileToFirebase(filename, data);
+		  return publicUrl;
 		},
 		// fallback to memory for everything else
 		unstable_createMemoryUploadHandler()
 	  );
 
-	return { "filename": filename };
+	return { filename };
 };
 
 export default function UploadObject()
 {  
   	const loaderData = useLoaderData<typeof loader>();
-    const actionData = useActionData();
+    const actionData = useActionData() as UploadResult;
 
 	if (actionData && actionData.fileName) {
 		return <>Upload successful.</>;
