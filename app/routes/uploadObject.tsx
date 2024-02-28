@@ -1,14 +1,14 @@
 import { ActionFunctionArgs,
 	LoaderFunctionArgs,
+	unstable_composeUploadHandlers as composeUploadHandlers,
+	unstable_parseMultipartFormData as parseMultipartFormData,
+	unstable_createFileUploadHandler as createFileUploadHandler,
 	json,
-	unstable_composeUploadHandlers,
-	unstable_createMemoryUploadHandler,
-	writeAsyncIterableToWritable
+	UploadHandler
 	} from "@remix-run/node";
-import { Form, useActionData, useLoaderData } from "@remix-run/react";
+import { useFetcher } from "@remix-run/react";
 import { getSession } from "~/session";
-import { bucket } from "~/utils/firebase";
-
+import {googleCloudUploadHandler} from "../services/gooleCloudService"
 export async function loader({
     request,
   }: LoaderFunctionArgs) {
@@ -23,61 +23,64 @@ export async function loader({
     return json(data);
 }
 
-async function UploadFileToFirebase(filename:string, data: AsyncIterable<Uint8Array>) : Promise<string>
-{	
-	const file = bucket.file(filename);
-
-	await writeAsyncIterableToWritable(
-		data,
-		file.createWriteStream()
-	);
-	
-	return file.publicUrl();
-}
-
-interface UploadResult
-{
-	fileName:string
-};
-
+type ActionData = {
+	errorMsg?: string;
+	imgSrc?: string;
+	imgDesc?: string;
+  };
 
 export async function action ({ request }: ActionFunctionArgs) 
 {
-	const formData = await request.formData();
-	const filename = formData.get("upload") as string;
-
-	const uploadHandler = unstable_composeUploadHandlers(
-		// our custom upload handler
-		async ({ name, data }) => {
-		  if (name !== "file") {
-			return undefined;
-		  }
-		  let publicUrl:string = await UploadFileToFirebase(filename, data);
-		  return publicUrl;
-		},
-		// fallback to memory for everything else
-		unstable_createMemoryUploadHandler()
+	const uploadHandler: UploadHandler = composeUploadHandlers(
+		googleCloudUploadHandler,
+		createFileUploadHandler(),
 	  );
-
-	return { filename };
+	  const formData = await parseMultipartFormData(request, uploadHandler);
+	  const imgSrc = formData.get("img");
+	  const imgDesc = formData.get("desc");
+	  console.log(imgDesc);
+	  if (!imgSrc) {
+		return json({
+		  errorMsg: "Something went wrong while uploading",
+		});
+	  }
+	  return json({
+		imgSrc,
+		imgDesc,
+	  });
 };
 
 export default function UploadObject()
-{  
-  	const loaderData = useLoaderData<typeof loader>();
-    const actionData = useActionData() as UploadResult;
-
-	if (actionData && actionData.fileName) {
-		return <>Upload successful.</>;
-	}
-
+{
+	const fetcher = useFetcher<ActionData>();
+	
 	return (
-		<div>
-			<p>{loaderData.scene}</p>
-			<Form method="post" encType="multipart/form-data">
-				<input type="file" name="upload" />
-				<button type="submit">upload</button>
-			</Form>
-		</div>
+	  <>
+		<fetcher.Form method="post" encType="multipart/form-data">
+		  <label htmlFor="img-field">Image to upload</label>
+		  <input id="img-field" type="file" name="img" accept="image/*" />
+		  <label htmlFor="img-desc">Image description</label>
+		  <input id="img-desc" type="text" name="desc" />
+		  <button type="submit">Upload to S3</button>
+		</fetcher.Form>
+
+		{(fetcher.state === "idle" && fetcher.data != null) ? (
+		  (fetcher.data as ActionData).errorMsg ? (
+			<h2>{(fetcher.data as ActionData).errorMsg}</h2>
+		  ) : (
+			<>
+			  <div>
+				File has been uploaded to S3 and is available under the following
+				URL (if the bucket has public access enabled):
+			  </div>
+			  <div>{(fetcher.data as ActionData).imgSrc}</div>
+			  <img
+				src={(fetcher.data as ActionData).imgSrc}
+				alt={(fetcher.data as ActionData).imgDesc || "Uploaded image from S3"}
+			  />
+			</>
+		  )
+		) : null}
+	  </>
 	);
 }

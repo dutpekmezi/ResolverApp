@@ -1,4 +1,5 @@
 {
     "url": "https://localhost:7231/api/v1/",
-    "imageUrl": "https://localhost:7231/StaticFiles/"
+    "imageUrl": "https://localhost:7231/StaticFiles/",
+    "firebaseBucketName": "gs://resolver-29d0f.appspot.com"
 }

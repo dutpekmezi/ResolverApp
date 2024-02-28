@@ -3,6 +3,7 @@ import { useLoaderData } from "@remix-run/react";
 import {GetRenderSceneNames, RenderSceneNames} from "~/services/renderService"
 import SceneSelectionCard from "~/components/SceneSelectionCard";
 import { commitSession, getSession } from "~/session";
+import { ExceptionMessages } from "node_modules/@google-cloud/storage/build/esm/src/storage";
 
 export const meta: MetaFunction = () => {
     return [
@@ -20,19 +21,24 @@ export async function loader()
 
 export async function action({request}: ActionFunctionArgs)
 {
-    const formData = await request.formData();
+    try {
+        const formData = await request.formData();
     
-    const session = await getSession(
-        request.headers.get("Cookie")
-      );
+        const session = await getSession(
+            request.headers.get("Cookie")
+        );
+        
+        session.set("scene", formData.get("scene") as string);
+        
+        return redirect("/uploadObject", {
+            headers: {
+            "Set-Cookie": await commitSession(session),
+            },
+        });
+    } catch (error) {
+       return error;
+    }
     
-    session.set("scene", formData.get("scene") as string);
-    
-    return redirect("/uploadObject", {
-        headers: {
-        "Set-Cookie": await commitSession(session),
-        },
-    });
 }
 
 export default function Render() {

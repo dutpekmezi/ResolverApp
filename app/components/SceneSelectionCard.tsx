@@ -19,7 +19,7 @@ export default function SceneSelectionCard(sceneName:string)
     }
 
     return (
-        <Form method="post" id="scene-select">
+        <Form method="post" id={"scene-select"}>
             <input type="hidden" name={"scene"} value={sceneName} />
             <button className="box-parent" type="submit">
                 <h1>{words.join(" ")}</h1>
