@@ -6,16 +6,23 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  useNavigation,
 } from "@remix-run/react";
 
 import styles from "./styles/main.css" 
 import MainNavigation from "./components/MainNavigation";
+import Spinner from "./components/Spinner";
 
 export const links: LinksFunction = () => [
    { rel: "stylesheet", href: styles }
 ];
 
 export default function App() {
+
+  const navigation = useNavigation()
+
+  const isLoading = navigation.state === 'loading';
+  
   return (
     <html lang="en">
       <head>
@@ -26,7 +33,7 @@ export default function App() {
       </head>
       <body>
         <header> <MainNavigation/> </header>
-        <Outlet />
+        { isLoading ? <Spinner/> : <Outlet/> }
         <ScrollRestoration />
         <Scripts />
         <LiveReload />

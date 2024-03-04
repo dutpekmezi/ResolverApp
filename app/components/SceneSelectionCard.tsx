@@ -10,8 +10,6 @@ export const meta: MetaFunction = () => {
 
 export default function SceneSelectionCard(sceneName:string) 
 {
-    const navigation = useNavigation();
-
     const words = sceneName.split("_");
 
     for (let i = 0; i < words.length; i++) {
@@ -21,9 +19,9 @@ export default function SceneSelectionCard(sceneName:string)
     return (
         <Form method="post" id={"scene-select"}>
             <input type="hidden" name={"scene"} value={sceneName} />
-            <button className="box-parent" type="submit">
+            <button className="scene-scelection-button" type="submit">
                 <h1>{words.join(" ")}</h1>
-                <img className="box" src={constants.imageUrl + (sceneName) + ".jpg"} alt={sceneName}/>
+                <img className="scene-selection-image" src={constants.imageUrl + (sceneName) + ".jpg"} alt={sceneName}/>
             </button>
         </Form>
     );

@@ -4,23 +4,29 @@ import { ActionFunctionArgs,
 	unstable_parseMultipartFormData as parseMultipartFormData,
 	unstable_createFileUploadHandler as createFileUploadHandler,
 	json,
-	UploadHandler
+	UploadHandler,
+	redirect
 	} from "@remix-run/node";
 import { useFetcher } from "@remix-run/react";
 import { getSession } from "~/session";
 import {googleCloudUploadHandler} from "../services/gooleCloudService"
-export async function loader({
-    request,
-  }: LoaderFunctionArgs) {
+
+export async function loader({ request }: LoaderFunctionArgs) {
+	
     const session = await getSession(
       request.headers.get("Cookie")
     );
   
     const scene = session.get("scene");
   
-    const data = { "scene": scene };
+    if (scene == null)
+	{
+		throw redirect("/render");
+	}
+
+	await new Promise(res => setTimeout(res, 3000));
   
-    return json(data);
+    return json(scene);
 }
 
 type ActionData = {
@@ -34,20 +40,20 @@ export async function action ({ request }: ActionFunctionArgs)
 	const uploadHandler: UploadHandler = composeUploadHandlers(
 		googleCloudUploadHandler,
 		createFileUploadHandler(),
-	  );
-	  const formData = await parseMultipartFormData(request, uploadHandler);
-	  const imgSrc = formData.get("img");
-	  const imgDesc = formData.get("desc");
-	  console.log(imgDesc);
-	  if (!imgSrc) {
+	);
+	const formData = await parseMultipartFormData(request, uploadHandler);
+	const imgSrc = formData.get("img");
+	const imgDesc = formData.get("desc");
+	console.log(imgDesc);
+	if (!imgSrc) {
 		return json({
-		  errorMsg: "Something went wrong while uploading",
+		  	errorMsg: "Something went wrong while uploading",
 		});
-	  }
-	  return json({
+	}
+	return json({
 		imgSrc,
 		imgDesc,
-	  });
+	});
 };
 
 export default function UploadObject()
@@ -65,18 +71,18 @@ export default function UploadObject()
 		</fetcher.Form>
 
 		{(fetcher.state === "idle" && fetcher.data != null) ? (
-		  (fetcher.data as ActionData).errorMsg ? (
-			<h2>{(fetcher.data as ActionData).errorMsg}</h2>
+		  fetcher.data.errorMsg ? (
+			<h2>{fetcher.data.errorMsg}</h2>
 		  ) : (
 			<>
 			  <div>
 				File has been uploaded to S3 and is available under the following
 				URL (if the bucket has public access enabled):
 			  </div>
-			  <div>{(fetcher.data as ActionData).imgSrc}</div>
+			  <div>{fetcher.data.imgSrc}</div>
 			  <img
-				src={(fetcher.data as ActionData).imgSrc}
-				alt={(fetcher.data as ActionData).imgDesc || "Uploaded image from S3"}
+				src={fetcher.data.imgSrc}
+				alt={fetcher.data.imgDesc || "Uploaded image from S3"}
 			  />
 			</>
 		  )

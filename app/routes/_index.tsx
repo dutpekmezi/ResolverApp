@@ -5,8 +5,8 @@ import { useNavigate } from "@remix-run/react"
 
 export const meta: MetaFunction = () => {
   return [
-    { title: "Resolver Auto Renderer" },
-    { name: "description", content: "Auto Renderer" },
+    { title: "Auto Renderer System" },
+    { name: "description", content: "Auto Renderer", },
   ];
 };
 
@@ -16,10 +16,10 @@ export default function Index() {
   return (
     <div>
       <div className="center">
-          <h1>Welcome To Resolver Auto Renderer</h1>
+          <h1>Welcome To Auto Render System</h1>
       </div>
       <div className="render-button-parent">
-        <button id="render-button" type="button" onClick={() => navigate("/render")}>Render Now!</button>
+        <button id="render-button" type="button" onClick={() => navigate("/render")}>Render Now</button>
       </div>
     </div>
   );

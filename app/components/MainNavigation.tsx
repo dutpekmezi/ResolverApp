@@ -1,6 +1,6 @@
 import { NavLink } from '@remix-run/react';
 
-function MainNavigation() {
+export default function MainNavigation() {
   return (
     <nav id="main-navigation">
       <ul>
@@ -10,9 +10,13 @@ function MainNavigation() {
         <li className="nav-item">
           <NavLink to="/About">About</NavLink>
         </li>
+        <li className="nav-item">
+          <NavLink to="/login">login</NavLink>
+        </li>
+        <li className="nav-item">
+          <NavLink to="/register">Register</NavLink>
+        </li>
       </ul>
     </nav>
   );
 }
-
-export default MainNavigation;

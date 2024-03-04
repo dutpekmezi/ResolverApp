@@ -2,7 +2,7 @@
 export default {
   ignoredRouteFiles: ["**/.*"],
   // appDirectory: "app",
-  // assetsBuildDirectory: "public/build",
+  assetsBuildDirectory: "public/build",
   // publicPath: "/build/",
   // serverBuildPath: "build/index.js",
   browserNodeBuiltinsPolyfill: { 
