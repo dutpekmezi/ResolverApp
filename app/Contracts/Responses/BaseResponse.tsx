@@ -1,6 +1,6 @@
 export default interface BaseResponse
 {
-    error: string;
-    message:string;
+    message?:string;
+    success:boolean;
     statusCode: Number;
 }

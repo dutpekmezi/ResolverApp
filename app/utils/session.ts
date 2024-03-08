@@ -3,6 +3,8 @@ import { createCookieSessionStorage } from "@remix-run/node"; // or cloudflare/d
 
 type SessionData = {
     scene:string;
+    accessToken:string;
+    userId:string;
 };
 
 type SessionFlashData = {

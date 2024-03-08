@@ -1,11 +1,12 @@
 import constants from "constants.json"
 import BaseResponse from "../Contracts/Responses/BaseResponse"
+import { accessToken } from "~/utils/userUtils";
 
-export interface RenderSceneNames extends BaseResponse {
+export interface RenderSceneNamesResponse extends BaseResponse {
     data: string[];
 }
 
-export async function GetRenderSceneNames() : Promise<RenderSceneNames>
+export async function GetRenderSceneNames() : Promise<RenderSceneNamesResponse>
 {
     try 
     {
@@ -15,23 +16,25 @@ export async function GetRenderSceneNames() : Promise<RenderSceneNames>
         const response = await fetch(constants.url + "render/getrenderscenenames", {
           method: 'GET',
           headers: {
+            Authorization: "Bearer " + accessToken,
             Accept: 'application/json',
           },
         });
     
         if (!response.ok) 
         {
-            let result = {} as RenderSceneNames;
+            let result = {} as RenderSceneNamesResponse;
             result.statusCode = response.status;
-            result.error = "Status Error";
+            result.message = "Status Error";
+            result.success = false;
 
             return result;
         }
 
-        const result: RenderSceneNames = {
+        const result: RenderSceneNamesResponse = {
             data: await response.json(),
-            error: "",
             message: "",
+            success: true,
             statusCode: response.status
         };
         
@@ -41,17 +44,18 @@ export async function GetRenderSceneNames() : Promise<RenderSceneNames>
     } 
     catch (error) 
     {
-        let result = {} as RenderSceneNames;
+        let result = {} as RenderSceneNamesResponse;
+        result.success = false;
         
         if (error instanceof Error) 
         {
           console.log('error message: ', error.message);
-          result.error = error.message;
+          result.message = error.message;
         } 
         else 
         {
           console.log('unexpected error: ', error);
-          result.error = 'unexpected error: ' + error;
+          result.message = 'unexpected error: ' + error;
         }
 
         return result;

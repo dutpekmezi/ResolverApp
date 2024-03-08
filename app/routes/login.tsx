@@ -1,5 +1,7 @@
-import { ActionFunction, json } from '@remix-run/node';
-import { Link, useActionData } from '@remix-run/react';
+import { ActionFunction, ActionFunctionArgs, json, redirect } from '@remix-run/node';
+import { Form, Link, useActionData } from '@remix-run/react';
+import { Login as LoginRequest, LoginResponse } from '~/services/authenticateService';
+import { commitSession, getSession } from "~/utils/session";
 
 import styles from '~/styles/register.css';
 
@@ -12,12 +14,30 @@ type ActionData = {
 };
 
 // Action function to handle form submission
-export const action: ActionFunction = async ({ request }) => {
+export const action: ActionFunction = async ({ request }: ActionFunctionArgs) => {
   const formData = await request.formData();
-  const email = formData.get('email');
-  const password = formData.get('password');
+  const email = formData.get('email') as string;
+  const password = formData.get('password') as string;
 
-  return json({ success: true, message: 'Login successful!' });
+  const loginResponse:LoginResponse = await LoginRequest(email, password);
+
+  const session = await getSession(
+    request.headers.get("Cookie")
+  );
+
+  session.set("accessToken", loginResponse.accessToken);
+  session.set("userId", loginResponse.userId);
+  
+  if (!loginResponse.success)
+  {
+    return json({ success: loginResponse.success, message: loginResponse.message });
+  }
+
+  return redirect("/userDashboard", {
+    headers: {
+      "Set-Cookie": await commitSession(session),
+    }
+  });
 };
 
 export default function Login() {
@@ -29,7 +49,7 @@ export default function Login() {
         <h1 className="form-title">Login</h1>
         {actionData?.success ? actionData?.message && <p className="success-message">{actionData.message}</p> : 
           actionData?.message && <p className="error-message">{actionData.message}</p>}
-        <form method="post" className="register-form">
+        <Form method="post" className="register-form">
         <div className="form-group">
             <label htmlFor="email" className="form-label">Email:</label>
             <input type="email" id="email" name="email" required className="form-input" />
@@ -39,7 +59,7 @@ export default function Login() {
             <input type="password" id="password" name="password" required className="form-input" />
           </div>
           <button type="submit" className="submit-button">Login</button>
-        </form>
+        </Form>
         <Link to="/register" className="login-link">Don't have an account? Sign Up</Link>
       </div>
       </center>

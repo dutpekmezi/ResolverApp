@@ -1,8 +1,8 @@
 import { ActionFunctionArgs, MetaFunction, redirect } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
-import {GetRenderSceneNames, RenderSceneNames} from "~/services/renderService"
+import {GetRenderSceneNames, RenderSceneNamesResponse} from "~/services/renderService"
 import SceneSelectionCard from "~/components/SceneSelectionCard";
-import { commitSession, getSession } from "~/session";
+import { commitSession, getSession } from "~/utils/session";
 
 export const meta: MetaFunction = () => {
     return [
@@ -14,8 +14,6 @@ export const meta: MetaFunction = () => {
 export async function loader()
 {
     const data = await GetRenderSceneNames();
-
-    await new Promise(res => setTimeout(res, 3000));
 
     return data;
 }
@@ -43,7 +41,7 @@ export async function action({request}: ActionFunctionArgs)
 }
 
 export default function SelectScene() {
-    const sceneNames:RenderSceneNames = useLoaderData<typeof loader>();
+    const sceneNames:RenderSceneNamesResponse = useLoaderData<typeof loader>();
     const items = sceneNames.data.map((name) => SceneSelectionCard(name));
 
     return (

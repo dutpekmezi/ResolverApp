@@ -2,15 +2,15 @@ import storage from "firebase-admin";
 import { firebaseApp } from "../utils/firebase";
 import { UploadHandler, 
   writeAsyncIterableToWritable,
-	unstable_createFileUploadHandler as createFileUploadHandler,
-  unstable_composeUploadHandlers as composeUploadHandlers
  } from "@remix-run/node";
+import { userId } from "~/utils/userUtils";
 
 export async function uploadFile(
   path: string,
   contentType: string,
   data: AsyncIterable<Uint8Array>
 ): Promise<{ url: string; size: number }> {
+
   return new Promise(async (resolve, reject) => {
     const file = storage.storage(firebaseApp)
       .bucket(`${process.env.FIREBASE_PROJECT_ID}.appspot.com`)
@@ -38,12 +38,12 @@ export async function uploadFile(
 }
 
 export const googleCloudUploadHandler : UploadHandler = async (file) => {
-  if (file.name !== "img" || !file.filename) {
+  if (file.name !== "file-upload" || !file.filename) {
     return undefined;
   }
 
   const { url, size } = await uploadFile(
-    `${file.filename}`,
+    `${userId}/${file.filename}`,
     file.contentType,
     file.data
   );
