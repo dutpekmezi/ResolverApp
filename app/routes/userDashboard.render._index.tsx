@@ -1,8 +1,9 @@
-import { ActionFunctionArgs, MetaFunction, redirect } from "@remix-run/node";
+import { ActionFunctionArgs, LoaderFunctionArgs, MetaFunction, redirect } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 import {GetRenderSceneNames, RenderSceneNamesResponse} from "~/services/renderService"
 import SceneSelectionCard from "~/components/SceneSelectionCard";
 import { commitSession, getSession } from "~/utils/session";
+import { RedirectToLoginIfUserInvalid } from "~/utils/userUtils";
 
 export const meta: MetaFunction = () => {
     return [
@@ -11,8 +12,7 @@ export const meta: MetaFunction = () => {
     ];
 };
 
-export async function loader()
-{
+export async function loader({request}: LoaderFunctionArgs) {
     const data = await GetRenderSceneNames();
 
     return data;
@@ -21,6 +21,9 @@ export async function loader()
 export async function action({request}: ActionFunctionArgs)
 {
     try {
+
+        await RedirectToLoginIfUserInvalid(request.headers);
+
         const formData = await request.formData();
     
         const session = await getSession(
@@ -29,7 +32,7 @@ export async function action({request}: ActionFunctionArgs)
         
         session.set("scene", formData.get("scene") as string);
         
-        return redirect("/render/1", {
+        return redirect("/userDashboard/render/1", {
             headers: {
             "Set-Cookie": await commitSession(session),
             },

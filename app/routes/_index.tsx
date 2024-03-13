@@ -19,7 +19,7 @@ export default function Index() {
           <h1>Welcome To Auto Render System</h1>
       </div>
       <div className="render-button-parent">
-        <button id="render-button" type="button" onClick={() => navigate("/render")}>Render Now</button>
+        <button id="render-button" type="button" onClick={() => navigate("/userDashboard/render/_index")}>Render Now</button>
       </div>
     </div>
   );

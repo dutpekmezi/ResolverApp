@@ -1,5 +1,6 @@
 import constants from "constants.json"
 import BaseResponse from "../Contracts/Responses/BaseResponse"
+import Fetch from "~/utils/fetchUtils";
 
 export interface LoginResponse extends BaseResponse
 {
@@ -24,7 +25,7 @@ export async function Login(email:string, password:string) : Promise<LoginRespon
     {
         process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = "0";
 
-        const response = await fetch(constants.authenticateUrl + "/login", {
+        const response = await Fetch(constants.authenticateUrl + "/login", {
           method: 'POST',
           body:`{
             "email": "${email}",
@@ -78,7 +79,7 @@ export async function Register(registerRequest:RegisterRequestData) : Promise<Re
     {
         process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = "0";
 
-        const response = await fetch(constants.authenticateUrl + "/register", {
+        const response = await Fetch(constants.authenticateUrl + "/register", {
           method: 'POST',
           body: JSON.stringify(registerRequest),
           headers: {

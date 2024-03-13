@@ -1,12 +1,8 @@
-import { LinksFunction, LoaderFunctionArgs } from "@remix-run/node";
-import { Outlet, useNavigation } from "@remix-run/react";
-import styles from "../styles/render.css"
+import { LoaderFunctionArgs } from "@remix-run/node";
+import { Outlet } from "@remix-run/react";
 import RenderSteps from "~/components/RenderSteps/RenderSteps";
 import { RedirectToLoginIfUserInvalid } from "~/utils/userUtils";
 
-export const links: LinksFunction = () => [
-    { rel: "stylesheet", href: styles }
- ];
 
  export async function loader({request}: LoaderFunctionArgs) {
     

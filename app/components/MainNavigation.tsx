@@ -11,7 +11,7 @@ export default function MainNavigation(isLoggedIn:boolean) {
           <NavLink to="/userDashboard">Dashboard</NavLink>
         </li>
         <li className="nav-item">
-          <NavLink to="/render">Render</NavLink>
+          <NavLink to="/userDashboard/render">Render</NavLink>
         </li>
         <li className="nav-item">
           <Form method='post' action='/logout'>

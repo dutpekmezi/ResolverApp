@@ -1,9 +1,15 @@
 import storage from "firebase-admin";
 import { firebaseApp } from "../utils/firebase";
-import { UploadHandler, 
+import {
+  UploadHandler,
   writeAsyncIterableToWritable,
- } from "@remix-run/node";
+} from "@remix-run/node";
 import { userId } from "~/utils/userUtils";
+import {
+  StartUploadModel as StartUploadModelRequest,
+  OnModelUploaded as OnModelUploadedRequest,
+  IsModelNameExist as IsModelNameExistRequest
+} from "~/services/userService";
 
 export async function uploadFile(
   path: string,
@@ -37,8 +43,8 @@ export async function uploadFile(
   });
 }
 
-export const googleCloudUploadHandler : UploadHandler = async (file) => {
-  if (file.name !== "file-upload" || !file.filename) {
+export const googleCloudUploadHandler: UploadHandler = async (file) => {
+  if (file.name !== "fileUpload" || !file.filename) {
     return undefined;
   }
 
@@ -48,10 +54,17 @@ export const googleCloudUploadHandler : UploadHandler = async (file) => {
     file.data
   );
 
+  const onUploadModelResponse = await OnModelUploadedRequest({
+    userId: userId,
+    modelId: startUploadModelResponse.id
+  });
+
+  if (!onUploadModelResponse.success) {
+    return JSON.stringify(onUploadModelResponse);
+  }
+
   return JSON.stringify({
-    url,
-    size,
-    name: file.filename,
-    contentType: file.contentType,
+    "success": true,
+    "message": `${file.filename} uploaded`
   });
 }

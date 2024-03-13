@@ -1,21 +1,22 @@
-import React, { useState, DragEvent, useRef, useEffect, FC } from 'react';
-import { useFetcher } from "@remix-run/react";
+import { useState, DragEvent, useRef, useEffect} from 'react';
+import objFileIcon from "../images/FileIcons/objFileIcon.png";
 
-interface DragDropFileUploadProps {
-    id: string; // ID to link the label and input
-}
 
-const DragDropFileUpload: FC<DragDropFileUploadProps> = ({ id }) => {
+const DragDropFileUpload = () => {
     const [isDragOver, setIsDragOver] = useState<boolean>(false);
-    const [filePreviews, setFilePreviews] = useState<string[]>([]);
+    const [fileName, setFileName] = useState<string>("");
+    
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const handleFilesChange = (files: FileList | null) => {
         if (files) {
             // Clean up the object URLs
-            filePreviews.forEach(URL.revokeObjectURL);
-            const fileUrls = Array.from(files).map(file => URL.createObjectURL(file));
-            setFilePreviews(fileUrls);
+            URL.revokeObjectURL(fileName)
+            if (files.length > 0)
+            {
+                setFileName(files[0].name as string);
+            }
+            
         }
     };
 
@@ -44,49 +45,39 @@ const DragDropFileUpload: FC<DragDropFileUploadProps> = ({ id }) => {
     useEffect(() => {
         // Clean up object URLs on unmount
         return () => {
-            filePreviews.forEach(URL.revokeObjectURL);
+            URL.revokeObjectURL(fileName);
         };
-    }, [filePreviews]);
-
-    const fetcher = useFetcher();
-
+    }, [fileName]);
+    
     return (
         <div>
-            <fetcher.Form method="post" encType="multipart/form-data" action='/render/1'>
+            <div onDragOver={handleDragOver} onDragLeave={handleDragLeave} onDrop={handleDrop}
+                className='file-drop-down'
+                style={{
+                    color: isDragOver ? '#007bff' : 'inherit',
+                }}>
 
-                <div
-                    onDragOver={handleDragOver}
-                    onDragLeave={handleDragLeave}
-                    onDrop={handleDrop}
-                    style={{
-                        border: '2px dashed #007bff',
-                        padding: '20px',
-                        borderRadius: '5px',
-                        textAlign: 'center',
-                        color: isDragOver ? '#007bff' : 'inherit',
-                        cursor: 'pointer',
-                    }}
-                >
-                    <input
-                        id={id}
-                        name={id}
-                        type="file"
-                        ref={fileInputRef}
-                        onChange={(e) => handleFilesChange(e.target.files)}
-                        style={{ display: 'none'}}
-                        accept="*.obj"
-                    />
-                    <label htmlFor={id}>Drag and drop files here or click to select files</label>
+                <input
+                    id="fileUpload"
+                    name="fileUpload"
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={(e) => handleFilesChange(e.target.files)}
+                    style={{ display: 'none'}}
+                    accept=".obj,.fbx"
+                />
+                <label className='text' htmlFor="fileUpload">Drag and drop files here or click to select files</label>
 
-                    <div>
-                        {filePreviews.map((filePreviewUrl, index) => (
-                            <img key={index} src={filePreviewUrl} alt="Preview" style={{ maxWidth: '100px', maxHeight: '100px', marginRight: '10px' }} />
-                        ))}
-                    </div>
+                <div>
+                    {fileName ?? (
+                        <div className='upload-preview-parent'>
+                            <img key={fileName} src={objFileIcon} alt="Preview" className='upload-preview-img'/>
+                            <p className='upload-preview-text text'>{fileName}</p>
+                        </div>
+                    )}
                 </div>
-
-                <button type="submit">Upload File</button>
-            </fetcher.Form>
+            </div>
+            <button type="submit" >Upload File</button>
         </div>
     );
 };

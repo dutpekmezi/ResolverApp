@@ -9,7 +9,6 @@ export default function RenderSteps(data:RenderStepsData)
 {
     const location = useLocation()
 
-    console.log(`pathname: ${location.pathname}`);
     const splitted = location.pathname.split("/");
     
     let currentIndex = parseInt(splitted[splitted.length - 1]);

@@ -1,6 +1,7 @@
 import constants from "constants.json"
 import BaseResponse from "../Contracts/Responses/BaseResponse"
 import { accessToken } from "~/utils/userUtils";
+import Fetch from "~/utils/fetchUtils";
 
 export interface RenderSceneNamesResponse extends BaseResponse {
     data: string[];
@@ -13,7 +14,7 @@ export async function GetRenderSceneNames() : Promise<RenderSceneNamesResponse>
         process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = "0";
 
         // 👇️ const response: Response
-        const response = await fetch(constants.url + "render/getrenderscenenames", {
+        const response = await Fetch(constants.url + "render/getrenderscenenames", {
           method: 'GET',
           headers: {
             Authorization: "Bearer " + accessToken,

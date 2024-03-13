@@ -17,7 +17,7 @@ export const { getSession, commitSession, destroySession } =
       // a Cookie from `createCookie` or the CookieOptions to create one
       cookie: {
         name: "resolve_session",
-        maxAge: 120,
+        maxAge: 1200,
         secrets: ["s3cret1"]
       },
     }

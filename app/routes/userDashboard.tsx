@@ -1,5 +1,5 @@
 import { ActionFunction, ActionFunctionArgs, LoaderFunctionArgs, json, redirect } from "@remix-run/node";
-import { useFetcher, useLoaderData } from "@remix-run/react";
+import { Outlet, useLoaderData } from "@remix-run/react";
 import { RedirectToLoginIfUserInvalid } from "~/utils/userUtils";
 
 import styles from '~/styles/userDashboard.css';
@@ -23,23 +23,13 @@ export async function loader({request}: LoaderFunctionArgs) {
     return json(loaderData);
 }
 
-// Action function to handle form submission
-export const action: ActionFunction = async ({ request }: ActionFunctionArgs) => {  
-
-    const userCookies = await RedirectToLoginIfUserInvalid(request.headers);
-
-    return {};
-};
-
 export default function userDashboard() {
     const loaderData = useLoaderData<LoaderData>();
 
-    const fetcher = useFetcher();
-
     return (
         <div>
-            <h1 className="text">User Dashboard</h1>
-            <h3 className="text">User Id: {loaderData?.userId}</h3>
+            <h4 className="text">User Id: {loaderData?.userId}</h4>
+            <Outlet/>
         </div>
     )
 }
