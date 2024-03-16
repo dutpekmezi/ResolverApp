@@ -9,15 +9,20 @@
   margin-top: 40px;
 }
 
-.upload-preview-img {
-    max-width: 50;
-    max-height: 50px;
-    margin-right: 10px;
-}
-
-.upload-preview-text {
+.upload-preview-parent p {
   color: white;
   text-align:left;
+}
+
+.upload-preview-parent img {
+  max-width: 50;
+  max-height: 50px;
+  margin-right: 10px;
+}
+
+.upload-model-form{
+  display: flex;
+  justify-content: center;
 }
 
 .file-drop-down{
@@ -26,7 +31,26 @@
   border-radius: 5px;
   text-align: center;
   cursor: pointer;
+  min-height: 125px;
   width: 500px;
+  margin-right: 20px;
+  margin-left: 20px;
+}
+.upload-model-override-checkbox{
+  align-self: center;
+  margin-right: 20px;
+  margin-left: 20px;
+}
+
+.upload-mode-button{
+
+  margin: 20px;
+  min-width: 160px;
+  min-height: 40px;
+  background-color: #007bff;
+  border-radius: 15px;
+  border-style:none;
+  color: white;
 }
   
 @keyframes fade-blur-in {

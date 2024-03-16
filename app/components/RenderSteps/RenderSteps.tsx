@@ -11,11 +11,17 @@ export default function RenderSteps(data:RenderStepsData)
 
     const splitted = location.pathname.split("/");
     
-    let currentIndex = parseInt(splitted[splitted.length - 1]);
+    let currentIndex = 0;
 
-    if (Number.isNaN(currentIndex))
+    for (let i = 0; i < splitted.length; i++) 
     {
-        currentIndex = 0;
+        if (splitted[i] == "render")
+        {
+            if (i+1 < splitted.length)
+            {
+                currentIndex = parseInt(splitted[i + 1]);
+            }
+        }
     }
 
     const arrows = data.titles?.map((title, index) => RenderStepArrow(index, index == currentIndex, title))

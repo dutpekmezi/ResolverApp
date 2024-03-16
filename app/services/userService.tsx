@@ -6,7 +6,6 @@ import Fetch from "~/utils/fetchUtils";
 export interface StartUploadModelRequest {
     userId:string;
     modelName:string;
-    overrideIfExist:boolean
 };
 
 export interface StartUploadModelResponse extends BaseResponse {
@@ -134,8 +133,8 @@ export async function IsModelNameExist(requestBody: StartUploadModelRequest) : P
       process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = "0";
 
       // 👇️ const response: Response
-      const response = await Fetch(constants.url + "user/models/uploaded", {
-        method: 'GET',
+      const response = await Fetch(constants.url + "user/models/isModelNameExist", {
+        method: 'POST',
         body: JSON.stringify(requestBody),
         headers: {
           Authorization: "Bearer " + accessToken,

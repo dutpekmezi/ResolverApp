@@ -1,13 +1,16 @@
-import { useState, DragEvent, useRef, useEffect} from 'react';
-import objFileIcon from "../images/FileIcons/objFileIcon.png";
+import { useState, DragEvent, useRef, useEffect, FC} from 'react';
+import objFileIcon from "../images/fileIcons/objFileIcon.png";
 
+interface DragDropFileUploadData
+{
+    onFileChange: () => void
+    fileInputRef: React.RefObject<HTMLInputElement>
+}
 
-const DragDropFileUpload = () => {
+const DragDropFileUpload:FC<DragDropFileUploadData> = ({onFileChange, fileInputRef} : DragDropFileUploadData) => {
     const [isDragOver, setIsDragOver] = useState<boolean>(false);
     const [fileName, setFileName] = useState<string>("");
     
-    const fileInputRef = useRef<HTMLInputElement>(null);
-
     const handleFilesChange = (files: FileList | null) => {
         if (files) {
             // Clean up the object URLs
@@ -15,6 +18,10 @@ const DragDropFileUpload = () => {
             if (files.length > 0)
             {
                 setFileName(files[0].name as string);
+            }
+            else
+            {
+                setFileName("");
             }
             
         }
@@ -38,6 +45,7 @@ const DragDropFileUpload = () => {
             if (input) {
                 input.files = event.dataTransfer.files;
                 handleFilesChange(event.dataTransfer.files);
+                onFileChange()
             }
         }
     };
@@ -50,34 +58,30 @@ const DragDropFileUpload = () => {
     }, [fileName]);
     
     return (
-        <div>
-            <div onDragOver={handleDragOver} onDragLeave={handleDragLeave} onDrop={handleDrop}
-                className='file-drop-down'
-                style={{
-                    color: isDragOver ? '#007bff' : 'inherit',
-                }}>
+        <div onDragOver={handleDragOver} onDragLeave={handleDragLeave} onDrop={handleDrop}
+            className='file-drop-down'>
 
-                <input
-                    id="fileUpload"
-                    name="fileUpload"
-                    type="file"
-                    ref={fileInputRef}
-                    onChange={(e) => handleFilesChange(e.target.files)}
-                    style={{ display: 'none'}}
-                    accept=".obj,.fbx"
-                />
-                <label className='text' htmlFor="fileUpload">Drag and drop files here or click to select files</label>
-
-                <div>
-                    {fileName ?? (
-                        <div className='upload-preview-parent'>
-                            <img key={fileName} src={objFileIcon} alt="Preview" className='upload-preview-img'/>
-                            <p className='upload-preview-text text'>{fileName}</p>
-                        </div>
-                    )}
+            <input
+                id="fileUpload"
+                name="fileUpload"
+                type="file"
+                ref={fileInputRef}
+                onChange={(e) => handleFilesChange(e.target.files)}
+                style={{ display: 'none'}}
+                accept=".obj,.fbx"
+                required
+            />
+            <label className='text' htmlFor="fileUpload" style={{
+                color: isDragOver ? '#007bff' : '#ffffff',
+            }}>
+                Drag and drop file here or click to select file</label>
+            
+            {fileName != "" ?(
+                <div className='upload-preview-parent'>
+                    <img key={fileName} src={objFileIcon} alt="Preview" className='upload-preview-img'/>
+                    <p className='upload-preview-text'>{fileName}</p>
                 </div>
-            </div>
-            <button type="submit" >Upload File</button>
+            ) : null}
         </div>
     );
 };

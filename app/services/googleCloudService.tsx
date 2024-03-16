@@ -48,6 +48,15 @@ export const googleCloudUploadHandler: UploadHandler = async (file) => {
     return undefined;
   }
 
+  const startUploadModelResponse = await StartUploadModelRequest({
+    userId: userId,
+    modelName: file.filename
+  });
+
+  if (!startUploadModelResponse.success) {
+    return JSON.stringify(startUploadModelResponse);
+  }
+
   const { url, size } = await uploadFile(
     `${userId}/${file.filename}`,
     file.contentType,

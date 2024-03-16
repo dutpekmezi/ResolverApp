@@ -15,7 +15,7 @@ export default function Render() {
 
     const titles = [
         "Select Scene",
-        "Upload Object",
+        "Select Model",
         "Set Transform",
         "Other Objects",
         "Render Configs",
@@ -27,7 +27,6 @@ export default function Render() {
     return(
         <div>
             {renderSteps}
-
             <Outlet/>
         </div>
     );

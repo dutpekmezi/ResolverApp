@@ -3,7 +3,6 @@ import { ActionFunctionArgs,
 	unstable_composeUploadHandlers as composeUploadHandlers,
 	unstable_parseMultipartFormData as parseMultipartFormData,
 	unstable_createFileUploadHandler as createFileUploadHandler,
-	json,
 	UploadHandler,
 	redirect
 	} from "@remix-run/node";
@@ -11,8 +10,8 @@ import { getSession } from "~/utils/session";
 import {googleCloudUploadHandler} from "../services/googleCloudService"
 import { RedirectToLoginIfUserInvalid, userId } from "~/utils/userUtils";
 import DragDropFileUpload from "~/components/DragDropFile";
-import { Outlet, useFetcher, useSubmit } from "@remix-run/react";
-import { useCallback } from "react";
+import { Form, Outlet, useFetcher, useSubmit } from "@remix-run/react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { StartUploadModel } from "~/services/userService";
 
 type LoaderData = {
@@ -39,6 +38,7 @@ export async function loader({ request }: LoaderFunctionArgs)
 type ActionData = {
 	success:Boolean;
 	message:String;
+	isNameTaken?:boolean;
   };
 
 export async function action ({ request }: ActionFunctionArgs) : Promise<ActionData>
@@ -52,7 +52,7 @@ export async function action ({ request }: ActionFunctionArgs) : Promise<ActionD
 
 	const formData = await parseMultipartFormData(request, uploadHandler);
 
-	const uploadResult = formData.get("file-upload");
+	const uploadResult = formData.get("fileUpload");
 
 	if (!uploadResult) {
 		return {
@@ -70,63 +70,79 @@ export default function UploadObject()
 
 	const fetcher = useFetcher<ActionData>({key: fetcherKey});
 
+	const [overridingModel, setOverridingModel] = useState(false);
+	const [modelNameValid, setModelNameValid] = useState(false);
+
+	useEffect(() => {
+		if (fetcher.data && fetcher.data.isNameTaken != undefined && fetcher.data.isNameTaken == false) {
+			setModelNameValid(true);
+		}
+	}, [fetcher.data]);
+
+	const _fileInputRef = useRef<HTMLInputElement>(null);
+
 	var uploadState = null;
 
 	if (fetcher.state != "idle")
 	{
-		uploadState = <h4 className="text">Uploading File..</h4>;
+		uploadState = <h4 className="text">{(overridingModel == false && modelNameValid == false) ? "Status: Checking if model name exist.." : "Uploading File.."} </h4>;
 	}
 	else if (fetcher.data)
 	{
-		uploadState = <h4 className="text">{fetcher.data.message}</h4>
+		uploadState = <h4 className="text">Status: {fetcher.data.message}</h4>
 	}
 
-	const submit = useSubmit()
+    const handleSubmit = useCallback(async (event: React.FormEvent<HTMLFormElement>) => 
+		{
+			event.preventDefault();
+			if (_fileInputRef.current && _fileInputRef.current.files && _fileInputRef.current.files.length > 0) {
+				//const file = fileInputRef.current?.files?.item(0);
+				const file = _fileInputRef.current.files[0];
 
-    const handleSubmit = useCallback(async (event: React.FormEvent<HTMLFormElement>) => {
-          	event.preventDefault();
-			
-			const startUploadModelResponse = await StartUploadModel({
-				userId: userId,
-				modelName: event.currentTarget.fileUpload.value,
-				overrideIfExist: event.currentTarget.overrideModel.value
-			});
+				const formData = new FormData();
+				formData.append('fileUpload', file);
 
-			if (!startUploadModelResponse.success) {
-				submit({
-					success: false,
-					message: startUploadModelResponse.message ?? "",
-					id: startUploadModelResponse.id,
-					fileUpload: event.currentTarget.fileUpload.value
-				},
+				if (overridingModel == false && modelNameValid == false)
 				{
-					method: "post",
-					encType: "multipart/form-data",
-				  });
+					fetcher.submit(formData,
+					{
+						action: "isFileExist",
+						method: "post",
+						encType: "multipart/form-data",
+					});
+				}
+				else
+				{
+					fetcher.submit(formData,
+					{
+						method: "post",
+						encType: "multipart/form-data",
+					});
+				}
 			}
-          
-
-          	submit({
-				fileUpload:  event.currentTarget.fileUpload.value
-			}, 
-			{
-				method: "post",
-				encType: "multipart/form-data",
-          	});
         },
-        [submit],
+        [fetcher, overridingModel],
       );
+
+	  const handleOverrideModelChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+		setOverridingModel(event.target.checked);
+	  };
 
 	return (
 	  <center>
+		<h2 className="text">Upload New Model</h2>
 		<fetcher.Form method="post" encType="multipart/form-data" onSubmit={handleSubmit}>
-			<DragDropFileUpload />
-			<div>
-                <label className='text' htmlFor="overrideModel">Override Existing Model</label>
-                <input id="overrideModel" name="overrideModel" type="checkbox"/>
-            </div>
+			<div className="upload-model-form">
+				<DragDropFileUpload onFileChange={() => { setModelNameValid(false); }} fileInputRef={_fileInputRef} />
+				<div className="upload-model-override-checkbox">
+					<label className='text' htmlFor="overrideModel">Override Existing Model</label>
+					<input id="overrideModel" name="overrideModel" type="checkbox" onChange={handleOverrideModelChange}/>
+				</div>
+			</div>
+			<button className="upload-mode-button" type="submit" >{overridingModel || modelNameValid ? "Upload Model" : "Check File Exist"}</button>
 		</fetcher.Form>
 		{uploadState}
+
 		<Outlet/>
 	  </center>
 	);
