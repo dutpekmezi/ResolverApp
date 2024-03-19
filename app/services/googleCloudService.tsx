@@ -74,6 +74,7 @@ export const googleCloudUploadHandler: UploadHandler = async (file) => {
 
   return JSON.stringify({
     "success": true,
-    "message": `${file.filename} uploaded`
+    "message": `${file.filename} uploaded`,
+    "actionType": "upload"
   });
 }

@@ -5,6 +5,8 @@ type SessionData = {
     scene:string;
     accessToken:string;
     userId:string;
+    modelId:string;
+    modelName:string;
 };
 
 type SessionFlashData = {

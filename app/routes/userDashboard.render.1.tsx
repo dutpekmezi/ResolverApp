@@ -10,13 +10,15 @@ import { getSession } from "~/utils/session";
 import {googleCloudUploadHandler} from "../services/googleCloudService"
 import { RedirectToLoginIfUserInvalid, userId } from "~/utils/userUtils";
 import DragDropFileUpload from "~/components/DragDropFile";
-import { Form, Outlet, useFetcher, useSubmit } from "@remix-run/react";
+import { Outlet, useFetcher, useLoaderData } from "@remix-run/react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { StartUploadModel } from "~/services/userService";
+import { FetchAllModelsResponse, FetchAllModels as FetchAllModelsRequest, Model } from "~/services/userService";
+import ModelSelectionBox from "~/components/ModelSelectionBox";
 
 type LoaderData = {
 	scene:string;
 	userId:string;
+	fetchAllModelsResponse:FetchAllModelsResponse;
   };
 
 export async function loader({ request }: LoaderFunctionArgs) 
@@ -31,13 +33,16 @@ export async function loader({ request }: LoaderFunctionArgs)
 	{
 		throw redirect("/userDashboard/render");
 	}
+
+	const fetchAllModelsResponse = await FetchAllModelsRequest();
   
-    return {scene, userId};
+    return {scene, userId, fetchAllModelsResponse};
 }
 
 type ActionData = {
 	success:Boolean;
-	message:String;
+	message:string;
+	actionType:string;
 	isNameTaken?:boolean;
   };
 
@@ -57,7 +62,8 @@ export async function action ({ request }: ActionFunctionArgs) : Promise<ActionD
 	if (!uploadResult) {
 		return {
 			success: false,
-			message: "Couldn't upload file."
+			message: "Couldn't upload file.",
+			actionType: "upload"
 		};
 	}
 
@@ -66,17 +72,27 @@ export async function action ({ request }: ActionFunctionArgs) : Promise<ActionD
 
 export default function UploadObject()
 {
-	const fetcherKey = "mainModelUpload";
 
-	const fetcher = useFetcher<ActionData>({key: fetcherKey});
+	const fetcher = useFetcher<ActionData>();
+	const loader = useLoaderData<LoaderData>();
 
 	const [overridingModel, setOverridingModel] = useState(false);
 	const [modelNameValid, setModelNameValid] = useState(false);
 
 	useEffect(() => {
-		if (fetcher.data && fetcher.data.isNameTaken != undefined && fetcher.data.isNameTaken == false) {
-			setModelNameValid(true);
+		if (fetcher.data) 
+		{
+			if (fetcher.data.success && fetcher.data.actionType == "nameCheck" && fetcher.data.isNameTaken == false)
+			{
+				setModelNameValid(true);
+			}
+			
+			if (fetcher.data.success && fetcher.data.actionType == "upload" )
+			{
+				setModelNameValid(false);
+			}
 		}
+
 	}, [fetcher.data]);
 
 	const _fileInputRef = useRef<HTMLInputElement>(null);
@@ -92,7 +108,7 @@ export default function UploadObject()
 		uploadState = <h4 className="text">Status: {fetcher.data.message}</h4>
 	}
 
-    const handleSubmit = useCallback(async (event: React.FormEvent<HTMLFormElement>) => 
+    const handleSubmit = useCallback((event: React.FormEvent<HTMLFormElement>) => 
 		{
 			event.preventDefault();
 			if (_fileInputRef.current && _fileInputRef.current.files && _fileInputRef.current.files.length > 0) {
@@ -128,6 +144,8 @@ export default function UploadObject()
 		setOverridingModel(event.target.checked);
 	  };
 
+	const models = loader.fetchAllModelsResponse.models.map((model) => ModelSelectionBox(model as unknown as Model));
+
 	return (
 	  <center>
 		<h2 className="text">Upload New Model</h2>
@@ -144,6 +162,8 @@ export default function UploadObject()
 		{uploadState}
 
 		<Outlet/>
+		{models}
+
 	  </center>
 	);
 }
