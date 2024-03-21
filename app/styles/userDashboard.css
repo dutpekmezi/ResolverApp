@@ -72,6 +72,36 @@
       opacity: 1;
     }
   }
+
+.existing-model-selection-wrapper{
+  align-items: center;
+  height: 100%;
+  width: 70%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  align-items: center;
+}
+
+.existing-model-selection{
+  border: #0059bf outset;
+  width: 15%;
+  height: 150px;
+  margin-bottom: 1%;
+  transition: 0.3s;
+  flex-basis: 25%;
+  font-size: 16px;
+}
+
+.existing-model-selection:hover{
+  border: #0073ff outset;
+  width: 15%;
+  margin-right: 0.7%;
+  margin-left: 0.7%;
+  background-color: #1f1f1f;
+  font-size: 16.5px;
+}
   
   .scene-selection-button {
       margin: 10px;
