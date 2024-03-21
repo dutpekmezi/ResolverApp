@@ -13,7 +13,7 @@ export default function ModelSelectionBox(model:Model)
     {
         formRef.current?.submit();
     }
-
+a
     return (
     <div key={model.id} onClick={onFileSelect}>
         <fetcher.Form ref={formRef} method="post" action="selectModel">
