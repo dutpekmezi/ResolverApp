@@ -15,14 +15,14 @@ export default function ModelSelectionBox(model:Model)
     }
 
     return (
-    <div key={model.id} onClick={onFileSelect}>
-        <fetcher.Form ref={formRef} method="post" action="selectModel">
-            <div>
-                <h4 className="text">{model.name}</h4>
-                <p className="text">{model.createTime.toLocaleString()}</p>
-            </div>
-            <input type="hidden" name={"modelId"} value={model.id} />
-            <input type="hidden" name={"modelName"} value={model.name} />
-        </fetcher.Form>
-    </div>);
+        <div key={model.id} onClick={onFileSelect} className="existing-model-selection">
+            <fetcher.Form ref={formRef} method="post" action="selectModel">
+                <div className="existing-model-selection-box">
+                    <h4 className="text">{model.name}</h4>
+                    <p className="text">{model.createTime.toLocaleString()}</p>
+                </div>
+                <input type="hidden" name={"modelId"} value={model.id} />
+                <input type="hidden" name={"modelName"} value={model.name} />
+            </fetcher.Form>
+        </div>);
 }
