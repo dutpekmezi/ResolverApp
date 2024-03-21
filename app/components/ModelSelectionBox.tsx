@@ -13,7 +13,7 @@ export default function ModelSelectionBox(model:Model)
     {
         formRef.current?.submit();
     }
-
+atilla
     return (
         <div key={model.id} onClick={onFileSelect} className="existing-model-selection">
             <fetcher.Form ref={formRef} method="post" action="selectModel">
