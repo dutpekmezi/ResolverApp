@@ -162,7 +162,9 @@ export default function UploadObject()
 		{uploadState}
 
 		<Outlet/>
-		{models}
+		<div className="existing-model-selection-wrapper">
+			{models}
+		</div>
 
 	  </center>
 	);
